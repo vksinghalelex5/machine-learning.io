@@ -1,11 +1,384 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Simple Page</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>IPXCEL Patent Services Chat</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 24px 16px 16px;
+    }
+
+    /* ── Header ── */
+    .header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .header .logo {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: #a78bfa;
+      margin-bottom: 4px;
+    }
+    .header h1 {
+      font-size: 22px;
+      font-weight: 700;
+      background: linear-gradient(90deg, #f472b6, #818cf8, #34d399);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: 1px;
+    }
+    .header .tagline {
+      font-size: 12px;
+      color: #94a3b8;
+      margin-top: 4px;
+      letter-spacing: 1px;
+    }
+
+    /* ── Chat window ── */
+    #chat-window {
+      width: 100%;
+      max-width: 700px;
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 20px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.5);
+    }
+
+    /* ── Chat bar at top ── */
+    .chat-topbar {
+      background: linear-gradient(90deg, #7c3aed, #2563eb);
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .avatar {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #f472b6, #818cf8);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .chat-topbar-info .name { font-size: 14px; font-weight: 600; color: #fff; }
+    .chat-topbar-info .status { font-size: 11px; color: #a5f3fc; display: flex; align-items: center; gap: 4px; }
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: #4ade80; display: inline-block; animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+    /* ── Messages area ── */
+    #chat-box {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      min-height: 380px;
+      max-height: 460px;
+      scroll-behavior: smooth;
+    }
+    #chat-box::-webkit-scrollbar { width: 5px; }
+    #chat-box::-webkit-scrollbar-track { background: transparent; }
+    #chat-box::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 10px; }
+
+    .msg-row {
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+    }
+    .msg-row.user { flex-direction: row-reverse; }
+
+    .msg-avatar {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px;
+      flex-shrink: 0;
+    }
+    .bot .msg-avatar { background: linear-gradient(135deg, #7c3aed, #2563eb); }
+    .user .msg-avatar { background: linear-gradient(135deg, #f472b6, #fb923c); }
+
+    .bubble {
+      max-width: 72%;
+      padding: 12px 16px;
+      font-size: 14px;
+      line-height: 1.6;
+      border-radius: 18px;
+      word-break: break-word;
+      position: relative;
+    }
+    .bot .bubble {
+      background: linear-gradient(135deg, rgba(124,58,237,0.5), rgba(37,99,235,0.5));
+      border: 1px solid rgba(139,92,246,0.4);
+      color: #e2e8f0;
+      border-bottom-left-radius: 4px;
+    }
+    .user .bubble {
+      background: linear-gradient(135deg, #f472b6, #fb923c);
+      color: #fff;
+      border-bottom-right-radius: 4px;
+      box-shadow: 0 4px 15px rgba(244,114,182,0.3);
+    }
+    .timestamp {
+      font-size: 10px;
+      color: #64748b;
+      margin-top: 3px;
+      text-align: right;
+    }
+    .msg-row.bot .timestamp { text-align: left; padding-left: 36px; }
+    .msg-row.user .timestamp { padding-right: 36px; }
+
+    /* Typing dots */
+    .typing-bubble {
+      display: flex; gap: 5px; align-items: center; padding: 14px 18px;
+    }
+    .typing-bubble span {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: #a78bfa;
+      animation: bounce 1.2s infinite;
+    }
+    .typing-bubble span:nth-child(2) { animation-delay: 0.2s; }
+    .typing-bubble span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-6px)} }
+
+    /* ── Input area ── */
+    .input-area {
+      padding: 14px 16px;
+      background: rgba(255,255,255,0.04);
+      border-top: 1px solid rgba(255,255,255,0.08);
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    #user-input {
+      flex: 1;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 50px;
+      padding: 12px 18px;
+      font-size: 14px;
+      color: #f1f5f9;
+      outline: none;
+      font-family: 'Inter', sans-serif;
+      transition: border 0.2s, background 0.2s;
+    }
+    #user-input::placeholder { color: #64748b; }
+    #user-input:focus {
+      border-color: #818cf8;
+      background: rgba(255,255,255,0.12);
+    }
+    #user-input:disabled { opacity: 0.5; }
+
+    #send-btn {
+      width: 46px; height: 46px;
+      border-radius: 50%;
+      border: none;
+      background: linear-gradient(135deg, #7c3aed, #2563eb);
+      color: #fff;
+      font-size: 20px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: transform 0.15s, box-shadow 0.15s;
+      box-shadow: 0 4px 15px rgba(124,58,237,0.4);
+      flex-shrink: 0;
+    }
+    #send-btn:hover:not(:disabled) { transform: scale(1.08); box-shadow: 0 6px 20px rgba(124,58,237,0.6); }
+    #send-btn:disabled { opacity: 0.4; cursor: default; transform: none; }
+
+    /* ── Footer ── */
+    .footer { margin-top: 14px; font-size: 11px; color: #475569; text-align: center; letter-spacing: 0.5px; }
+  </style>
 </head>
 <body>
-    <h1>Welcome to My Website</h1>
-    <p>This is a minimalist HTML page built in exactly ten lines of code.</p>
+
+  <div class="header">
+    <div class="logo">⚖️ IPXCEL</div>
+    <h1>PATENT SERVICES CHAT</h1>
+    <div class="tagline">Intelligent Patent Filing Assistant</div>
+  </div>
+
+  <div id="chat-window">
+    <div class="chat-topbar">
+      <div class="avatar">🤖</div>
+      <div class="chat-topbar-info">
+        <div class="name">PatentBot by IPXCEL</div>
+        <div class="status"><span class="dot"></span> Online — Ready to assist</div>
+      </div>
+    </div>
+
+    <div id="chat-box"></div>
+
+    <div class="input-area">
+      <input id="user-input" type="text" placeholder="Type your patent requirements here…" />
+      <button id="send-btn" title="Send">➤</button>
+    </div>
+  </div>
+
+  <div class="footer">🔒 Your information is handled securely · IPXCEL Patent Services © 2026</div>
+
+  <script>
+    const chatBox = document.getElementById("chat-box");
+    const userInput = document.getElementById("user-input");
+    const sendBtn = document.getElementById("send-btn");
+
+    const SYSTEM_PROMPT = `You are PatentBot, a professional patent filing assistant for IPXCEL Patent Services. Your ONLY job is to collect patent filing requirements from the user.
+
+Start by welcoming them. Then collect these details ONE or TWO at a time, in a friendly and professional tone:
+
+1. Applicant's full name
+2. Nationality and country of residence
+3. Contact details (email and phone)
+4. Title of the invention
+5. Type of invention (product, process, composition, or design)
+6. Industry/field (e.g. electronics, biotech, software, mechanical, etc.)
+7. What problem does the invention solve and how does it work?
+8. Key features or claims to be protected
+9. Does a prototype or working model exist?
+10. Has the invention been publicly disclosed, published, or sold? If yes, when and where?
+11. Has a prior art search been conducted?
+12. Preferred filing jurisdiction (India, USA, PCT/international, etc.)
+13. Names of all inventors (if different from applicant)
+14. Any co-inventors or co-applicants?
+15. Preferred timeline for filing
+
+After collecting all info, provide a clean formatted summary and ask the user to confirm.
+
+Rules:
+- Only discuss patent filing. Politely decline all other topics.
+- Ask 1–2 questions per message only.
+- Be warm, clear, and guide confused users.
+- Never make legal promises or guarantees.`;
+
+    const messageHistory = [];
+
+    function getTime() {
+      return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function addMessage(text, role, isTyping = false) {
+      const row = document.createElement("div");
+      row.classList.add("msg-row", role);
+
+      const avatar = document.createElement("div");
+      avatar.classList.add("msg-avatar");
+      avatar.textContent = role === "bot" ? "🤖" : "👤";
+
+      if (isTyping) {
+        const bubble = document.createElement("div");
+        bubble.classList.add("bubble");
+        bubble.innerHTML = `<div class="typing-bubble"><span></span><span></span><span></span></div>`;
+        row.appendChild(avatar);
+        row.appendChild(bubble);
+        chatBox.appendChild(row);
+        chatBox.scrollTop = chatBox.scrollHeight;
+        return row;
+      }
+
+      const wrap = document.createElement("div");
+
+      const bubble = document.createElement("div");
+      bubble.classList.add("bubble");
+      bubble.textContent = text;
+
+      const ts = document.createElement("div");
+      ts.classList.add("timestamp");
+      ts.textContent = getTime();
+
+      wrap.appendChild(bubble);
+      wrap.appendChild(ts);
+
+      if (role === "bot") {
+        row.appendChild(avatar);
+        row.appendChild(wrap);
+      } else {
+        row.appendChild(wrap);
+        row.appendChild(avatar);
+      }
+
+      chatBox.appendChild(row);
+      chatBox.scrollTop = chatBox.scrollHeight;
+      return row;
+    }
+
+    function setLoading(state) {
+      sendBtn.disabled = state;
+      userInput.disabled = state;
+    }
+
+    async function getBotReply() {
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-6",
+          max_tokens: 1000,
+          system: SYSTEM_PROMPT,
+          messages: messageHistory,
+        }),
+      });
+      const data = await res.json();
+      return data.content?.map(b => b.text || "").join("") || "Sorry, I couldn't process that.";
+    }
+
+    async function send() {
+      const text = userInput.value.trim();
+      if (!text || sendBtn.disabled) return;
+      userInput.value = "";
+
+      addMessage(text, "user");
+      messageHistory.push({ role: "user", content: text });
+
+      setLoading(true);
+      const typingRow = addMessage("", "bot", true);
+
+      try {
+        const reply = await getBotReply();
+        typingRow.remove();
+        addMessage(reply, "bot");
+        messageHistory.push({ role: "assistant", content: reply });
+      } catch {
+        typingRow.remove();
+        const err = "Sorry, something went wrong. Please try again.";
+        addMessage(err, "bot");
+        messageHistory.push({ role: "assistant", content: err });
+      } finally {
+        setLoading(false);
+        userInput.focus();
+      }
+    }
+
+    sendBtn.addEventListener("click", send);
+    userInput.addEventListener("keydown", e => { if (e.key === "Enter") send(); });
+
+    // Boot messages
+    const intros = [
+      "👋 Welcome to IPXCEL Patent Services! I'm PatentBot, your dedicated patent filing assistant.",
+      "I'll guide you step by step to collect everything needed to file your patent. Please type in full sentences so I can assist you accurately.",
+      "Let's get started! Could you please tell me your full name?",
+    ];
+    intros.forEach(msg => {
+      addMessage(msg, "bot");
+      messageHistory.push({ role: "assistant", content: msg });
+    });
+  </script>
+
 </body>
 </html>
