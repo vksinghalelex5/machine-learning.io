@@ -1,0 +1,22 @@
+import numpy as np
+import pandas as pd
+
+# 1. From a dictionary of lists
+data_dict = {
+    "Employee_ID": [101, 102, 103, 104, 105],
+    "Name": ["Alice", "Bob", "Charlie", "David", "Eva"],
+    "Department": ["HR", "IT", "IT", "Marketing", "Sales"],
+    "Salary": [60000, 85000, 90000, 75000, 110000],
+    "Join_Date": ["2021-01-15", "2020-05-12", "2022-11-01", "2019-03-20", "2023-02-18"],
+}
+df = pd.DataFrame(data_dict)
+print(df)
+
+Output:
+
+   Employee_ID     Name Department  Salary   Join_Date
+0          101    Alice         HR   60000  2021-01-15
+1          102      Bob         IT   85000  2020-05-12
+2          103  Charlie         IT   90000  2022-11-01
+3          104    David  Marketing   75000  2019-03-20
+4          105      Eva      Sales  110000  2023-02-18
