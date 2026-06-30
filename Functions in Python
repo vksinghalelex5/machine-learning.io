@@ -1,0 +1,69 @@
+def my_function(fname):
+  print(fname + " Refsnes")
+
+my_function("Emil")
+my_function("Tobias")
+my_function("Linus")
+
+Output:
+Emil Refsnes
+Tobias Refsnes
+Linus Refsnes
+
+def my_function(fname, lname):
+  print(fname + " " + lname)
+
+my_function("Emil", "Refsnes")
+
+output:
+Emil Refsnes
+
+
+def my_function(fname, lname):
+  print(fname + " " + lname)
+my_function("Emil")
+
+Output: It will show error and one parameter is missing. 
+
+def my_function(country = "Norway"):
+  print("I am from", country)
+
+my_function("Sweden")
+my_function("India")
+my_function()
+my_function("Brazil")
+
+Output:
+I am from Sweden
+I am from India
+I am from Norway
+I am from Brazil
+
+def my_function(animal, name):
+  print("I have a", animal)
+  print("My", animal + "'s name is", name)
+my_function(name = "Buddy", animal = "dog")
+
+Output:
+I have a dog
+My dog's name is Buddy
+
+def my_function(animal, name):
+  print("I have a", animal)
+  print("My", animal + "'s name is", name)
+
+my_function("dog", "Buddy")
+
+Output:
+I have a dog
+My dog's name is Buddy
+
+def my_function(animal, name, age):
+  print("I have a", age, "year old", animal, "named", name)
+
+my_function("dog", name = "Buddy", age = 5)
+
+Output:
+
+I have a 5 year old dog named Buddy
+
