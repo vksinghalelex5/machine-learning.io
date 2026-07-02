@@ -1,0 +1,84 @@
+x = 5
+y = "John"
+print(x)
+print(y)
+
+Output:
+5
+John
+
+x = 4
+x = "Sally"
+print(x)
+
+Output:
+Sally
+
+x = 5
+y = "John"
+z= 'Peter'
+print(type(x))
+print(type(y))
+print(type(z))
+
+output:
+<class 'int'>
+<class 'str'>
+<class 'str'>
+
+x = "Thomas"
+print(x)
+#double quotes are the same as single quotes:
+x = 'Thomas'
+print(x)
+
+Output:
+Thomas
+Thomas
+
+a = 4
+A = "Peter"
+
+print(a)
+print(A)
+
+Output:
+4
+Peter
+
+Multiple variables in python: 
+
+x, y, z = "Orange", "Banana", "Cherry"
+# or x, y, z = "Orange", "Banana", "Cherry"
+
+print(x)
+print(y)
+print(z)
+
+Output:
+Orange
+Banana
+Cherry
+
+x = y = z = "Orange"
+
+print(x)
+print(y)
+print(z)
+
+output: 
+Orange
+Orange
+Orange
+
+fruits = ["apple", "banana", "cherry"]
+x, y, z = fruits
+print(x)
+print(y)
+print(z)
+
+output:
+
+apple
+banana
+cherry
